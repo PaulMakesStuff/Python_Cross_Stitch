@@ -1,4 +1,4 @@
-# Python Cross Stich Patterns!
+# Python Cross Stitch Patterns!
 Takes a .jpg image file and generates a cross stitch pattern using a user specified number of DMC colours.
 
 Prior to using this script you will need to install [Python Imaging Library - PIL](http://www.pythonware.com/products/pil/). 
@@ -11,3 +11,5 @@ path to the folder containing the image you wish to convert.
  number of DMC colours to use the third is the stitch count.
  
  Example output below:
+
+ ![Output Image](https://github.com/PaulMakesStuff/Python_Cross_Stitch/blob/master/col_sym.png)
