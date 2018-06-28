@@ -18,4 +18,4 @@ Example output image below. This pattern has a stitch count of 100, and uses 10 
 
  ![Output Image](https://github.com/PaulMakesStuff/Python_Cross_Stitch/blob/master/col_sym.png)
  
- This package of files comes with a list of DMC colours, and their RGB values - this could be replaced with whatever thred you wish to use, for example Anchor. The nearest colour is picked based upon what DMC colour would look the closest, and is not simply done based upon how close the input RGB is to the DMC RGB.
+ This package of files comes with a list of DMC colours, and their RGB values - this could be replaced with whatever thread you wish to use, for example Anchor. The nearest colour is picked based upon what DMC colour would look the closest, and is not simply done based upon how close the input RGB is to the DMC RGB.
