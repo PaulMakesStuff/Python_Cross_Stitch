@@ -10,6 +10,6 @@ path to the folder containing the image you wish to convert.
  So the first argument is the name of the file to convert, note this must be .jpg for the time being, the second is the 
  number of DMC colours to use the third is the stitch count.
  
- Example output below:
+ Example output below is the colour pattern file with symbols:
 
  ![Output Image](https://github.com/PaulMakesStuff/Python_Cross_Stitch/blob/master/col_sym.png)
