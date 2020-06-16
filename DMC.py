@@ -8,10 +8,6 @@ class DMC:
     
     dmc = {}
     
-    #
-    # INITIALISATION AND AUTHORISATION, AUTHORISATION USING OAUTH (TWO LEGGED).
-    #
-    
     def __init__(self):
         with open('dmc_dict.csv', mode='r') as infile:
             reader = csv.reader(infile)
