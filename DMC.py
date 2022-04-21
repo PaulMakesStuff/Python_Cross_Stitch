@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 import csv
 import math
 
@@ -9,7 +11,7 @@ class DMC:
     dmc = {}
     
     def __init__(self):
-        with open('dmc_dict.csv', mode='r') as infile:
+        with open(os.path.join(sys.path[0], 'dmc_dict.csv'), mode='r') as infile:
             reader = csv.reader(infile)
             self.dmc = {rows[0]: [int(rows[1]), int(rows[2]), int(rows[3]), rows[4], rows[0]] for rows in reader}
     
