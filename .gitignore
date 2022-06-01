@@ -1,0 +1,7 @@
+__pycache__
+*.svg
+*.png
+*.jpg
+!examples/*.svg
+!examples/*.png
+!examples/*.jpg
