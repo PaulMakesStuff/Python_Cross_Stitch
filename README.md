@@ -1,9 +1,9 @@
 # Python Cross Stitch Patterns!
 Takes a .jpg image file and generates a cross stitch pattern using a user specified number of DMC colours.
 
-Prior to using this script you will need to install [Python Imaging Library - PIL](http://www.pythonware.com/products/pil/). 
-Once installed, open up either terminal, or command prompt and then run the following command replacing the file path with a 
-path to the folder containing the image you wish to convert.
+Prior to using this script, you will need to run pip install -r requirements.txt to install the necessary dependencies.
+
+Once installed, open either the terminal or command prompt, and run the following command, replacing the file path with the path to the folder containing the image you wish to convert.
 
     python "/pixelate.py" "/wave.jpg" 10 100
     
