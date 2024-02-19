@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 # algorithm
 #
 # a. process options
@@ -56,7 +53,7 @@ im = Image.open(input_file_name)
 
 new_width  = 1000
 pixelSize = int(new_width / int(count))
-new_height = new_width * im.size[1] / im.size[0]
+new_height = int(new_width * im.size[1] / im.size[0])
 im = im.resize((new_width, new_height), Image.NEAREST)
 
 # 1, 2
