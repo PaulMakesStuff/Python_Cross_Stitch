@@ -27,6 +27,16 @@ The script generates the following SVG files:
 * col_nsy.svg: Color-only pattern.
 * key.svg: Color key for reference.
 
+### Example input image below:
+
+![Input Image](https://github.com/PaulMakesStuff/Python_Cross_Stitch/blob/master/wave.jpg)
+
+Example output image below. This pattern has a stitch count of 100, and uses 10 DMC colours. Other outputs from this script include a black and white pattern; a colour pattern with no symbols to get an idea of what the final cross stitch will look like; as well as a key so you'll know what DMC colours to purchase.
+
+![Output Image](https://github.com/PaulMakesStuff/Python_Cross_Stitch/blob/master/col_sym.png)
+
+This package of files comes with a list of DMC colours, and their RGB values - this could be replaced with whatever thread you wish to use, for example Anchor. The nearest colour is picked based upon what DMC colour would look the closest, and is not simply done based upon how close the input RGB is to the DMC RGB.
+
 ### Note
 This script uses adaptive quantization for color reduction to improve pattern quality. Adjusting the number of colors may affect the pattern's appearance and size.
 
