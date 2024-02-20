@@ -28,10 +28,10 @@ python pixelate.py
 ### Output
 The script generates the following SVG files in a paste with the inputed file in patterns directory:
 
-* col_sym.svg: Color with symbols pattern.
-* blw_sym.svg: Black/white pattern with symbols.
-* col_nsy.svg: Color-only pattern.
-* key.svg: Color key for reference.
+* cross_stitch_pattern.svg: Color with symbols pattern.
+* black_white_pattern.svg: Black/white pattern with symbols.
+* pixelated_image.svg: Color-only pattern.
+* colours.svg: Color key for reference.
 
 ### Example input image below:
 
