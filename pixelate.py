@@ -1,7 +1,3 @@
-
-# TODO: Save
-# TODO: Funções
-# TODO: Analisar possibilidade de otimização
 import os
 from PIL import Image
 from DMC import DMC
@@ -17,73 +13,55 @@ def get_neighbours(pos, matrix):
             if not (i == pos[0] and j == pos[1]):
                 yield matrix[i][j]
 
-@Gooey
-def main():
-    
-    # a. process options
+def process_options():
     parser = GooeyParser(description="Cross Stich Pattern Generator")
-
     parser.add_argument("input_file_name", metavar="Input File Name, need to be a jpg!", widget="FileChooser")
     parser.add_argument("num_colours", metavar="Number of Colours", type=int, help="Number of colours to use in the pattern")
     parser.add_argument("count", metavar="Stitch Count", type=int, help="Stitch count, number of stitches in x axis")
-
     args = parser.parse_args()
+    return args.input_file_name, args.num_colours, args.count
 
-    input_file_name = args.input_file_name
-    num_colours = args.num_colours
-    count = args.count
+def open_resize_image(input_file_name, count):
+    im = Image.open(input_file_name)
+    new_width = 1000
+    pixelSize = int(new_width / int(count))
+    new_height = int(new_width * im.size[1] / im.size[0])
+    return im.resize((new_width, new_height), Image.NEAREST), pixelSize
 
+def convert_to_dmc(im, pixelSize):
+    d = DMC()
+    return [[d.get_dmc_rgb_triple(im.getpixel((x, y))) for x in range(0, im.size[0], pixelSize)] for y in range(0, im.size[1], pixelSize)]
+
+def create_quantised_image(dmc_spaced, num_colours):
+    dmc_image = Image.new('RGB', (len(dmc_spaced[0]), len(dmc_spaced)))
+    dmc_image.putdata([value for row in dmc_spaced for value in row])
+    return dmc_image.convert('P', palette=Image.ADAPTIVE, colors=num_colours), dmc_image.size[0], dmc_image.size[1]
+
+def create_svg_pattern(dmc_image, num_colours):
+    svg_pattern = [[dmc_image.getpixel((x, y)) for x in range(dmc_image.size[0])] for y in range(dmc_image.size[1])]
+    palette = dmc_image.getpalette()
+    d = DMC()
+    svg_palette = [d.get_colour_code_corrected((palette[i * 3], palette[i * 3 + 1], palette[i * 3 + 2])) for i in range(num_colours)]
+    return svg_pattern, svg_palette
+
+def clean_up_pattern(svg_pattern, x_count, y_count):
+    for x in range(0, x_count):
+        for y in range(0, y_count):
+            gen = get_neighbours([y, x], svg_pattern)
+            neighbours = []
+            for n in gen:
+                neighbours += [n]
+            if svg_pattern[y][x] not in neighbours:
+                mode = max(neighbours, key=neighbours.count)
+                svg_pattern[y][x] = mode
+    return svg_pattern
+
+def create_svgs(svg_pattern, svg_palette, svg_cell_size, x_count, y_count):
     col_sym = SVG(False, True, True)
     blw_nsy = SVG(True, True, True)
     col_nsy = SVG(False, False, False)
     key = SVG(False, True, True)
 
-    # b. open image
-    im = Image.open(input_file_name)
-
-    # c. resize image
-    new_width = 1000
-    pixelSize = int(new_width / int(count))
-    new_height = int(new_width * im.size[1] / im.size[0])
-    im = im.resize((new_width, new_height), Image.NEAREST)
-
-
-    # 1. take the spaced out pixels
-    # 2. convert these pixels to dmc colours
-    d = DMC()
-    dmc_spaced = [[d.get_dmc_rgb_triple(im.getpixel((x, y))) for x in range(0, im.size[0], pixelSize)] for y in
-                  range(0, im.size[1], pixelSize)]
-
-    # 3. create a new smaller image with these pixels
-    dmc_image = Image.new('RGB', (len(dmc_spaced[0]), len(dmc_spaced)))
-    dmc_image.putdata([value for row in dmc_spaced for value in row])
-
-    # 4. quantise the image with the required number of colours
-    # 5. a new image can then be created with row x column of palette indices
-    dmc_image = dmc_image.convert('P', palette=Image.ADAPTIVE, colors=num_colours)
-    x_count = dmc_image.size[0]
-    y_count = dmc_image.size[1]
-    svg_pattern = [[dmc_image.getpixel((x, y)) for x in range(x_count)] for y in range(y_count)]
-
-    # 6. a new palette can then be created with the dmc 'objects'
-    palette = dmc_image.getpalette()
-    svg_palette = [d.get_colour_code_corrected((palette[i * 3], palette[i * 3 + 1], palette[i * 3 + 2])) for i in
-                   range(num_colours)]
-
-    # 7. do any extra required cleaning up, for example removing isolated pixels
-    if True:
-        for x in range(0, x_count):
-            for y in range(0, y_count):
-                gen = get_neighbours([y, x], svg_pattern)
-                neighbours = []
-                for n in gen:
-                    neighbours += [n]
-                if svg_pattern[y][x] not in neighbours:
-                    mode = max(neighbours, key=neighbours.count)
-                    svg_pattern[y][x] = mode
-
-    # 8. svgs can be produced of black/white, colour with symbols, colour only patterns.
-    svg_cell_size = 10
     width = x_count * svg_cell_size
     height = y_count * svg_cell_size
     col_sym.prep_for_drawing(width, height)
@@ -103,7 +81,6 @@ def main():
     blw_nsy.major_gridlines(svg_cell_size, width, height)
     col_sym.major_gridlines(svg_cell_size, width, height)
 
-    # 9. generate the key table
     size = 40
     key.prep_for_drawing(size * 13, size * len(svg_palette))
     x = y = 0
@@ -111,23 +88,31 @@ def main():
         key.add_key_colour(x, y, size, i, svg_palette[i])
         y += size
 
-    # 10. save images
-    
+    return col_sym, blw_nsy, col_nsy, key
+
+def save_images(col_sym, blw_nsy, col_nsy, key, input_file_name):
     parent_dir = os.curdir
     patterns_path = os.path.join(parent_dir, "patterns")
     pattern_dir = os.path.join(patterns_path, os.path.splitext(os.path.basename(input_file_name))[0])
 
-    # Cria o diretório dentro de "patterns" com o nome do arquivo, se não existir
     if not os.path.exists(pattern_dir):
         os.makedirs(pattern_dir)
 
-    # Salva os arquivos dentro do diretório criado
     col_sym.save(os.path.join(pattern_dir, 'cross_stitch_pattern.svg'))
     blw_nsy.save(os.path.join(pattern_dir, 'black_white_pattern.svg'))
     col_nsy.save(os.path.join(pattern_dir, 'pixelated_image.svg'))
     key.save(os.path.join(pattern_dir, 'colours.svg'))
 
+@Gooey
+def main():
+    input_file_name, num_colours, count = process_options()
+    im, pixelSize = open_resize_image(input_file_name, count)
+    dmc_spaced = convert_to_dmc(im, pixelSize)
+    dmc_image, x_count, y_count = create_quantised_image(dmc_spaced, num_colours)
+    svg_pattern, svg_palette = create_svg_pattern(dmc_image, num_colours)
+    svg_pattern = clean_up_pattern(svg_pattern, x_count, y_count)
+    col_sym, blw_nsy, col_nsy, key = create_svgs(svg_pattern, svg_palette, 10, x_count, y_count)
+    save_images(col_sym, blw_nsy, col_nsy, key, input_file_name)
+
 if __name__ == "__main__":
     main()
-    
-    
