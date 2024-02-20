@@ -1,2 +1,7 @@
-Pillow==10.1.0
+colored==2.2.4
 Gooey==1.0.8.1
+Pillow==10.1.0
+psutil==5.9.8
+pygtrie==2.5.0
+six==1.16.0
+wxPython==4.2.1
