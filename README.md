@@ -8,7 +8,13 @@ This Python script converts an input image into a cross-stitch pattern using DMC
 3. **Stitch Count:** Define the stitch count, i.e., the number of stitches in the x-axis.
 
 ### Dependencies
-- Python 3.x
+You can use:
+
+```bash
+pip install requirements.txt
+```
+
+To install this dependencies:
 - PIL (Python Imaging Library)
 - gooey
 
@@ -20,7 +26,7 @@ python pixelate.py
 ```
 
 ### Output
-The script generates the following SVG files:
+The script generates the following SVG files in a paste with the inputed file in patterns directory:
 
 * col_sym.svg: Color with symbols pattern.
 * blw_sym.svg: Black/white pattern with symbols.
