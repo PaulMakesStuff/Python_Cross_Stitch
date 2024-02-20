@@ -5,6 +5,16 @@ from SVG import SVG
 from gooey import Gooey, GooeyParser
 
 def get_neighbours(pos, matrix):
+    """
+    Get the neighboring elements of a given position in a matrix.
+
+    Args:
+        pos (tuple): The position (row, column) to find neighbors for.
+        matrix (list): The matrix.
+
+    Returns:
+        generator: A generator yielding the neighboring elements.
+    """
     rows = len(matrix)
     cols = len(matrix[0]) if rows else 0
     width = 1
@@ -14,6 +24,12 @@ def get_neighbours(pos, matrix):
                 yield matrix[i][j]
 
 def process_options():
+    """
+    Parse command line arguments to get input file name, number of colors, and stitch count.
+
+    Returns:
+        tuple: A tuple containing input file name, number of colors, and stitch count.
+    """
     parser = GooeyParser(description="Cross Stich Pattern Generator")
     parser.add_argument("input_file_name", metavar="Input File Name, need to be a jpg!", widget="FileChooser")
     parser.add_argument("num_colours", metavar="Number of Colours", type=int, help="Number of colours to use in the pattern")
@@ -22,6 +38,17 @@ def process_options():
     return args.input_file_name, args.num_colours, args.count
 
 def open_resize_image(input_file_name, count):
+    """
+    Open and resize the input image.
+
+    Args:
+        input_file_name (str): The file name of the input image.
+        count (int): The stitch count.
+
+    Returns:
+        Image: The resized image.
+        int: The size of each pixel.
+    """
     im = Image.open(input_file_name)
     new_width = 1000
     pixelSize = int(new_width / int(count))
@@ -29,15 +56,45 @@ def open_resize_image(input_file_name, count):
     return im.resize((new_width, new_height), Image.NEAREST), pixelSize
 
 def convert_to_dmc(im, pixelSize):
+    """
+    Convert the image pixels to DMC colors.
+
+    Args:
+        im (Image): The input image.
+        pixelSize (int): The size of each pixel.
+
+    Returns:
+        list: A list of lists representing DMC color values for each pixel.
+    """
     d = DMC()
     return [[d.get_dmc_rgb_triple(im.getpixel((x, y))) for x in range(0, im.size[0], pixelSize)] for y in range(0, im.size[1], pixelSize)]
 
 def create_quantised_image(dmc_spaced, num_colours):
+    """
+    Create SVG pattern and palette from the quantised image.
+
+    Args:
+        dmc_image (Image): The quantised image.
+        num_colours (int): The number of colors used in the image.
+
+    Returns:
+        tuple: A tuple containing the SVG pattern and palette.
+    """
     dmc_image = Image.new('RGB', (len(dmc_spaced[0]), len(dmc_spaced)))
     dmc_image.putdata([value for row in dmc_spaced for value in row])
     return dmc_image.convert('P', palette=Image.ADAPTIVE, colors=num_colours), dmc_image.size[0], dmc_image.size[1]
 
 def create_svg_pattern(dmc_image, num_colours):
+    """
+    Create SVG pattern and palette from the quantised image.
+
+    Args:
+        dmc_image (Image): The quantised image.
+        num_colours (int): The number of colors used in the image.
+
+    Returns:
+        tuple: A tuple containing the SVG pattern and palette.
+    """
     svg_pattern = [[dmc_image.getpixel((x, y)) for x in range(dmc_image.size[0])] for y in range(dmc_image.size[1])]
     palette = dmc_image.getpalette()
     d = DMC()
@@ -45,6 +102,17 @@ def create_svg_pattern(dmc_image, num_colours):
     return svg_pattern, svg_palette
 
 def clean_up_pattern(svg_pattern, x_count, y_count):
+    """
+    Clean up the SVG pattern by removing isolated pixels.
+
+    Args:
+        svg_pattern (list): A list of lists representing the SVG pattern.
+        x_count (int): The number of columns in the SVG pattern.
+        y_count (int): The number of rows in the SVG pattern.
+
+    Returns:
+        list: The cleaned SVG pattern.
+    """
     for x in range(0, x_count):
         for y in range(0, y_count):
             gen = get_neighbours([y, x], svg_pattern)
@@ -57,6 +125,19 @@ def clean_up_pattern(svg_pattern, x_count, y_count):
     return svg_pattern
 
 def create_svgs(svg_pattern, svg_palette, svg_cell_size, x_count, y_count):
+    """
+    Create SVG images for different visualizations of the pattern.
+
+    Args:
+        svg_pattern (list): A list of lists representing the SVG pattern.
+        svg_palette (list): A list of colors used in the SVG pattern.
+        svg_cell_size (int): The size of each cell in the SVG images.
+        x_count (int): The number of columns in the SVG pattern.
+        y_count (int): The number of rows in the SVG pattern.
+
+    Returns:
+        tuple: A tuple containing SVG images for different visualizations.
+    """
     col_sym = SVG(False, True, True)
     blw_nsy = SVG(True, True, True)
     col_nsy = SVG(False, False, False)
@@ -91,6 +172,16 @@ def create_svgs(svg_pattern, svg_palette, svg_cell_size, x_count, y_count):
     return col_sym, blw_nsy, col_nsy, key
 
 def save_images(col_sym, blw_nsy, col_nsy, key, input_file_name):
+    """
+    Save SVG images of the pattern and color palette.
+
+    Args:
+        col_sym (SVG): SVG image of the cross-stitch pattern.
+        blw_nsy (SVG): SVG image of the black-and-white pattern.
+        col_nsy (SVG): SVG image of the pixelated image.
+        key (SVG): SVG image of the color palette.
+        input_file_name (str): The name of the input image file.
+    """
     parent_dir = os.curdir
     patterns_path = os.path.join(parent_dir, "patterns")
     pattern_dir = os.path.join(patterns_path, os.path.splitext(os.path.basename(input_file_name))[0])
