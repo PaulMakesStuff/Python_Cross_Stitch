@@ -1,20 +1,8 @@
-# algorithm
-#
-# a. process options
-# b. open image
-# c. resize image
-#
-# 1. take the spaced out pixels
-# 2. convert these pixels to dmc colours
-# 3. create a new smaller image with these pixels
-# 4. quantise the image with the required number of colours
-# 5. a new image can then be created with row x column of palette indices
-# 6. a new palette can then be created with the dmc 'objects'
-# 7. do any extra required cleaning up, for example removing isolated pixels
-# 8. svgs can be produced of black/white, colour with symbols, colour only patterns.
-# 9. generate the key table
 
-import sys
+# TODO: Save
+# TODO: Funções
+# TODO: Analisar possibilidade de otimização
+import os
 from PIL import Image
 from DMC import DMC
 from SVG import SVG
@@ -31,9 +19,11 @@ def get_neighbours(pos, matrix):
 
 @Gooey
 def main():
-    parser = GooeyParser(description="Generate Interface")
+    
+    # a. process options
+    parser = GooeyParser(description="Cross Stich Pattern Generator")
 
-    parser.add_argument("input_file_name", metavar="Input File Name", widget="FileChooser")
+    parser.add_argument("input_file_name", metavar="Input File Name, need to be a jpg!", widget="FileChooser")
     parser.add_argument("num_colours", metavar="Number of Colours", type=int, help="Number of colours to use in the pattern")
     parser.add_argument("count", metavar="Stitch Count", type=int, help="Stitch count, number of stitches in x axis")
 
@@ -48,29 +38,39 @@ def main():
     col_nsy = SVG(False, False, False)
     key = SVG(False, True, True)
 
+    # b. open image
     im = Image.open(input_file_name)
 
+    # c. resize image
     new_width = 1000
     pixelSize = int(new_width / int(count))
     new_height = int(new_width * im.size[1] / im.size[0])
     im = im.resize((new_width, new_height), Image.NEAREST)
 
+
+    # 1. take the spaced out pixels
+    # 2. convert these pixels to dmc colours
     d = DMC()
     dmc_spaced = [[d.get_dmc_rgb_triple(im.getpixel((x, y))) for x in range(0, im.size[0], pixelSize)] for y in
                   range(0, im.size[1], pixelSize)]
 
+    # 3. create a new smaller image with these pixels
     dmc_image = Image.new('RGB', (len(dmc_spaced[0]), len(dmc_spaced)))
     dmc_image.putdata([value for row in dmc_spaced for value in row])
 
+    # 4. quantise the image with the required number of colours
+    # 5. a new image can then be created with row x column of palette indices
     dmc_image = dmc_image.convert('P', palette=Image.ADAPTIVE, colors=num_colours)
     x_count = dmc_image.size[0]
     y_count = dmc_image.size[1]
     svg_pattern = [[dmc_image.getpixel((x, y)) for x in range(x_count)] for y in range(y_count)]
 
+    # 6. a new palette can then be created with the dmc 'objects'
     palette = dmc_image.getpalette()
     svg_palette = [d.get_colour_code_corrected((palette[i * 3], palette[i * 3 + 1], palette[i * 3 + 2])) for i in
                    range(num_colours)]
 
+    # 7. do any extra required cleaning up, for example removing isolated pixels
     if True:
         for x in range(0, x_count):
             for y in range(0, y_count):
@@ -82,6 +82,7 @@ def main():
                     mode = max(neighbours, key=neighbours.count)
                     svg_pattern[y][x] = mode
 
+    # 8. svgs can be produced of black/white, colour with symbols, colour only patterns.
     svg_cell_size = 10
     width = x_count * svg_cell_size
     height = y_count * svg_cell_size
@@ -102,6 +103,7 @@ def main():
     blw_nsy.major_gridlines(svg_cell_size, width, height)
     col_sym.major_gridlines(svg_cell_size, width, height)
 
+    # 9. generate the key table
     size = 40
     key.prep_for_drawing(size * 13, size * len(svg_palette))
     x = y = 0
@@ -109,10 +111,21 @@ def main():
         key.add_key_colour(x, y, size, i, svg_palette[i])
         y += size
 
-    col_sym.save('col_sym.svg')
-    blw_nsy.save('blw_sym.svg')
-    col_nsy.save('col_nsy.svg')
-    key.save('key.svg')
+    # 10. save images
+    
+    parent_dir = os.curdir
+    patterns_path = os.path.join(parent_dir, "patterns")
+    pattern_dir = os.path.join(patterns_path, os.path.splitext(os.path.basename(input_file_name))[0])
+
+    # Cria o diretório dentro de "patterns" com o nome do arquivo, se não existir
+    if not os.path.exists(pattern_dir):
+        os.makedirs(pattern_dir)
+
+    # Salva os arquivos dentro do diretório criado
+    col_sym.save(os.path.join(pattern_dir, 'cross_stitch_pattern.svg'))
+    blw_nsy.save(os.path.join(pattern_dir, 'black_white_pattern.svg'))
+    col_nsy.save(os.path.join(pattern_dir, 'pixelated_image.svg'))
+    key.save(os.path.join(pattern_dir, 'colours.svg'))
 
 if __name__ == "__main__":
     main()
