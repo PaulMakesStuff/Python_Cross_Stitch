@@ -31,7 +31,7 @@ def process_options():
         tuple: A tuple containing input file name, number of colors, and stitch count.
     """
     parser = GooeyParser(description="Cross Stich Pattern Generator")
-    parser.add_argument("input_file_name", metavar="Input File Name, need to be a jpg!", widget="FileChooser")
+    parser.add_argument("input_file_name", metavar="Image", widget="FileChooser", help="Need to be a jpg!")
     parser.add_argument("num_colours", metavar="Number of Colours", type=int, help="Number of colours to use in the pattern")
     parser.add_argument("count", metavar="Stitch Count", type=int, help="Stitch count, number of stitches in x axis")
     args = parser.parse_args()
